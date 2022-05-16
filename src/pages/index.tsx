@@ -6,23 +6,46 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import styles from '../styles/Home.module.css'
 import { Task } from 'typings/tasks';
 import { useTasks } from 'store';
+import EditIcon from '@mui/icons-material/Edit';
 
 const Home: NextPage = () => {
-  const { tasks, setTasks } = useTasks();
+  const { setTaskIndexToEdit, taskIndexToEdit, tasks, setTasks } = useTasks();
   const [openCreateModal, setOpenCreateModal] = useState(false);
-  const [taskInfo, setTaskInfo] = useState<Task>({
-    name: '',
-    description: '',
-  })
+  const [taskInfo, setTaskInfo] = useState<Task>({ description: '' });
 
-  const createTask = () => {
-    setTasks([...tasks, { ...taskInfo }]);
-    setTaskInfo({
-      name: '',
-      description: '',
-    })
-    setOpenCreateModal(false);
+  const createOrEditTask = (index?: number | null) => {
+    if (index !== null) {
+      const newTaskList = [...tasks.slice(0, index), {
+        description: taskInfo.description
+      }, ...tasks.slice(index! + 1)];
+      setTasks([...newTaskList]);
+      setTaskIndexToEdit(null);
+      setOpenCreateModal(false);
+    } else {
+      if (taskInfo.description) {
+        setOpenCreateModal(false);
+        setTasks([...tasks, { ...taskInfo }]);
+      }
+    }
+    setTaskInfo({ description: '' });
   };
+
+  const deleteTask = (index: number) => {
+    const newTaskList = [...tasks.slice(0, index),
+    ...tasks.slice(index + 1)];
+    setTasks([...newTaskList]);
+  };
+
+  const editTask = (index: number) => {
+    setTaskIndexToEdit(index);
+    setTaskInfo({ description: tasks[index].description });
+    setOpenCreateModal(true);
+  }
+
+  const cancelEdit = () => {
+    setTaskInfo({ description: '' });
+    setOpenCreateModal(false);
+  }
 
   return (
     <main className={styles.main}>
@@ -48,35 +71,29 @@ const Home: NextPage = () => {
             fontSize: 36,
           }}>+</Button>
         </div>
-
         <div className={styles.tasksList}>
           {tasks.map((t, index) => (
-            <div key={index}>
-              {t.name}
+            <div key={index} className={styles.taskRow}>
+              {t.description}
+              <div>
+                <Button variant="outlined" onClick={() => editTask(index)} startIcon={<EditIcon />}>
+                  Edit
+                </Button>
+                <Button variant="outlined" color="error" onClick={() => deleteTask(index)} startIcon={<DeleteIcon />} sx={{
+                  marginLeft: '10px',
+                }}>
+                  Delete
+                </Button>
+              </div>
             </div>
           ))}
         </div>
-
-
-        {/* <Button variant="outlined" color="error" onClick={() => setOpenCreateModal(true)} startIcon={<DeleteIcon />}>
-          Delete
-        </Button> */}
       </div>
 
       {openCreateModal && (
         <div className={styles.createModalBg}>
           <div className={styles.createModal}>
             <div className={styles.modalContent}>
-              <TextField
-                variant="outlined"
-                label="Name"
-                value={taskInfo.name}
-                onChange={(e) => setTaskInfo({ ...taskInfo, name: e.target.value })}
-                sx={{
-                  width: '100%',
-                  zIndex: 0,
-                  marginBottom: '20px',
-                }} />
               <TextField
                 multiline
                 maxRows={8}
@@ -91,19 +108,19 @@ const Home: NextPage = () => {
                 }} />
             </div>
             <div className={styles.modalFooter}>
-              <Button variant="outlined" color="error" onClick={() => setOpenCreateModal(false)} sx={{
+              <Button variant="outlined" color="error" onClick={cancelEdit} sx={{
                 height: 40,
               }}>
                 Cancel
               </Button>
               <Button
                 variant="contained"
-                onClick={createTask}
+                onClick={() => createOrEditTask(taskIndexToEdit)}
                 sx={{
                   height: 40,
                   marginLeft: '15px',
                 }}>
-                Create
+                {taskIndexToEdit !== null ? 'Continue' : 'Create'}
               </Button>
             </div>
           </div>

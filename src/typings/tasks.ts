@@ -1,9 +1,10 @@
 export interface Task {
-  name: string,
   description: string,
 }
 
 export interface TasksStateTypes {
+  taskIndexToEdit: number | null,
   tasks: Task[],
+  setTaskIndexToEdit: (number: number | null) => void,
   setTasks: (task: Task[]) => void
 }
