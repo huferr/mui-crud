@@ -1,4 +1,5 @@
 import '../styles/globals.css'
+import '../methods/String.ts'
 import Head from 'next/head'
 import type { AppProps } from 'next/app'
 

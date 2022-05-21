@@ -1,5 +1,4 @@
 import { TextField, Button } from '@mui/material'
-import { TextareaAutosize } from '@mui/base';
 import type { NextPage } from 'next'
 import { useState } from 'react';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -12,6 +11,7 @@ const Home: NextPage = () => {
   const { setTaskIndexToEdit, taskIndexToEdit, tasks, setTasks } = useTasks();
   const [openCreateModal, setOpenCreateModal] = useState(false);
   const [taskInfo, setTaskInfo] = useState<Task>({ description: '' });
+  const [search, setSearch] = useState('');
 
   const createOrEditTask = (index?: number | null) => {
     if (index !== null) {
@@ -47,6 +47,8 @@ const Home: NextPage = () => {
     setOpenCreateModal(false);
   }
 
+  const _taskList = tasks.filter(t => t.description.formatToSearch(search))
+
   return (
     <main className={styles.main}>
       <header className={styles.header}>
@@ -60,7 +62,7 @@ const Home: NextPage = () => {
       </header>
       <div className={styles.section}>
         <div className={styles.sectionHeader}>
-          <TextField variant="outlined" label="Search for Tasks" sx={{
+          <TextField variant="outlined" value={search} onChange={(e) => setSearch(e.target.value)} label="Search for Tasks" sx={{
             width: '80%',
             marginRight: 2,
             zIndex: 0,
@@ -72,7 +74,7 @@ const Home: NextPage = () => {
           }}>+</Button>
         </div>
         <div className={styles.tasksList}>
-          {tasks.map((t, index) => (
+          {_taskList.map((t, index) => (
             <div key={index} className={styles.taskRow}>
               {t.description}
               <div>
